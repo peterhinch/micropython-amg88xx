@@ -70,11 +70,6 @@ _INTEN = const(3)
 _TTHL = const(0x0e)
 _TTHH = const(0x0f)
 
-# Temperature of each pixel across the sensor in Celsius.
-
-# Temperatures are stored in an integer array .data two dimensional list where the first index is the row and
-# the second is the column. The first row is on the side closest to the writing on the
-# sensor.
 
 class AMG88XX:
 
@@ -126,7 +121,7 @@ class AMG88XX:
             v = -(v & 0x7ff)
         return float(v) * _THERMISTOR_CONVERSION
 
-    # Pixel temp as integer Celcius. Access as instance[row, col]
+    # Pixel temperature as integer Celcius. Access as sensor_instance[row, col]
     def __getitem__(self, index):
         row, col = index
         self._validrc(row, col)
