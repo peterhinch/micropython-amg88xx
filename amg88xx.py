@@ -70,20 +70,6 @@ _INTEN = const(3)
 _TTHL = const(0x0e)
 _TTHH = const(0x0f)
 
-# For Adafruit. Tested on Unix
-#def _signed_12bit_to_float(val):
-    ##take first 11 bits as absolute val
-    #abs_val = (val & 0x7FF)
-    #if val & 0x800:
-        #return 0 - float(abs_val)
-    #return float(abs_val)
-
-#def _twos_comp_to_float(val):
-    #val &= 0xfff
-    #if val & 0x800:
-        #val -= 0x1000
-    #return float(val)
-
 # Temperature of each pixel across the sensor in Celsius.
 
 # Temperatures are stored in an integer array .data two dimensional list where the first index is the row and
