@@ -34,12 +34,13 @@ If used with a Pyboard
 
 This maintains an internal `bytearray` object holding a single frame of raw
 data from the sensor. It is populated by the `refresh` method. The contents may
-be retrieved as integer Temperatures in °C by means of array access syntax.
+be retrieved as integer temperatures in °C by means of array access syntax.
 
 Constructor:  
 This takes the following arguments:
  * `i2c` An `I2C` instance created using the `machine` module.
- * `address=0x69` The default device address.
+ * `address=0x69` The default device address. If you solder the jumper on the
+ back of the board labeled `Addr`, the address will change to 0x68.
 
 Methods:
  * `refresh` Takes an optional arg which is ignored. This method causes the
@@ -73,8 +74,8 @@ while True:
 
 # 4. Camera demo
 
-Currently a work in progress. This works, but the image quality doesn't yet
-match that shown on the Adafruit website. It assumes a Pyboard linked to an
+This works, but I may do further work to improve the image quality. It assumes
+a Pyboard linked to an
 [Adafruit 0.96 OLED display](https://www.adafruit.com/product/684). Wiring is
 as follows:
 
