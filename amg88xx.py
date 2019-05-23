@@ -24,7 +24,7 @@
 # Original author(s): Dean Miller, Scott Shawcroft for Adafruit Industries.
 # Date: June 2017
 # Affiliation: Adafruit Industries
-# Ported to MicroPython by Peter Hinch
+# Ported to MicroPython and extended by Peter Hinch
 # This port copyright (c) Peter Hinch 2019
 
 from micropython import const
@@ -69,6 +69,8 @@ _FPS = const(2)
 _INTEN = const(3)
 _TTHL = const(0x0e)
 _TTHH = const(0x0f)
+_MAMOD = const(0x07)
+_MAMOD1 = const(0x15)
 
 
 class AMG88XX:
@@ -81,7 +83,9 @@ class AMG88XX:
 
     def __init__(self, i2c, addr=0x69):
         self._i2c = i2c
-        self.address = addr
+        self._address = addr
+        self._scale = 2
+        self._mamod = False
         # Pixel buffer 2 bytes/pixel (128 bytes)
         self._buf = bytearray(_PIXEL_ARRAY_HEIGHT * _PIXEL_ARRAY_WIDTH * 2)
         self._buf2 = bytearray(2)
@@ -100,17 +104,17 @@ class AMG88XX:
 
     # read byte from register, return int
     def _read(self, memaddr, buf=bytearray(1)):  # memaddr = memory location within the I2C device
-        self._i2c.readfrom_mem_into(self.address, memaddr, buf)
+        self._i2c.readfrom_mem_into(self._address, memaddr, buf)
         return buf[0]
 
     # write byte to register
     def _write(self, memaddr, data, buf=bytearray(1)):
         buf[0] = data
-        self._i2c.writeto_mem(self.address, memaddr, buf)
+        self._i2c.writeto_mem(self._address, memaddr, buf)
 
     # read n bytes, return buffer
     def _readn(self, buf, memaddr):  # memaddr = memory location within the I2C device
-        self._i2c.readfrom_mem_into(self.address, memaddr, buf)
+        self._i2c.readfrom_mem_into(self._address, memaddr, buf)
         return buf
 
     # Sensor temperature in Celcius
@@ -121,6 +125,24 @@ class AMG88XX:
             v = -(v & 0x7ff)
         return float(v) * _THERMISTOR_CONVERSION
 
+    # Set resolution: integer temps are shifted right 2 for °C
+    def hi_res(self, v=None):
+        if v is not None:
+            self._scale = 0 if v else 2
+        return self._scale == 0
+
+    # Set or clear moving average mode
+    def ma_mode(self, v=None):
+        if v is not None:
+            self._mamod = bool(v)  # Exception if illegal type passed
+            v = 0x20 if v else 0
+            self._write(_MAMOD1, 0x50)
+            self._write(_MAMOD1, 0x45)
+            self._write(_MAMOD1, 0x57)
+            self._write(_MAMOD, v)
+            self._write(_MAMOD1, 0)
+        return self._mamod
+
     # Pixel temperature as integer Celcius. Access as sensor_instance[row, col]
     def __getitem__(self, index):
         row, col = index
@@ -129,11 +151,11 @@ class AMG88XX:
         raw = ((self._buf[buf_idx + 1] << 8) | self._buf[buf_idx]) & 0xfff
         if raw & 0x800:
             raw -= 0x1000  # Sign extend
-        return raw >> 2  # Pixel temp conversion == 0.25
+        return raw >> self._scale  # Pixel temp conversion == 0.25
 
     # Call before accessing a frame of data. Can be called in an ISR.
     # Blocks for 2.9ms on Pyboard 1.0
     def refresh(self, _ = None):  # Dummy arg for use in timer callback
         i2c = self._i2c
         memaddr = _PIXEL_OFFSET
-        i2c.readfrom_mem_into(self.address, memaddr, self._buf)
+        i2c.readfrom_mem_into(self._address, memaddr, self._buf)
