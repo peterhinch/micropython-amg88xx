@@ -1,16 +1,16 @@
 # micropython-amg88xx
 Driver for Grid-EYE 8x8 pixel thermal infra red array sensor (Adafruit 3538).
 
-The driver, test programs and this doc are provisional and may be subject to
-change.
+Now provides optional bicubic interpolation for camera displays.
 
 The driver is a port of the
 [Adafruit CircuitPython driver](https://github.com/adafruit/Adafruit_CircuitPython_AMG88xx)
-modified for MicroPython. Dependencies on Adafruit libraries removed, coding
-adapted to conform to MicroPython conventions.
+modified for MicroPython.
 
 Original author(s): Dean Miller, Scott Shawcroft.  
-Adapted by Peter Hinch.
+Adapted by Peter Hinch. Dependencies on Adafruit libraries removed, coding
+adapted to conform to MicroPython conventions. Extended to provide additional
+functionality.
 
 # 1. Files
 
@@ -31,6 +31,12 @@ which also has a driver for their larger displays based on the SSD1351 chip.
 
 The driver for the official LCD160CR is included in Pyboard firmware. Source is
 [here](https://github.com/micropython/micropython/blob/master/drivers/display/lcd160cr.py).
+
+## 1.1 Interpolation
+
+In camera applications the 8*8 matrix of the AMG8833 gives a "blocky" effect.
+This can be reduced by using bicubic interpolation. Files and
+[doc](./interpolate/README.md) for this are in the `interpolate` directory.
 
 # 2. Wiring
 

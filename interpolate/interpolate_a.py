@@ -16,10 +16,6 @@ _PIXEL_ARRAY_HEIGHT = const(8)
 _WIDTH = const(10)
 _HEIGHT = const(10)
 
-@micropython.viper
-def interp_arr_x(p, x):
-    return p[1] + 0.5 * x*(p[2] - p[0] + x*(2.0*p[0] - 5.0*p[1] + 4.0*p[2] - p[3] + x*(3.0*(p[1] - p[2]) + p[3] - p[0])))
-
 # Cubic interpolation of a 4 element one dimensional array of samples p.
 # Interpolation is between samples p[1] and p[2]: samples p[0] and p[3] provide
 # a first derivative estimate at points p[1] and p[2].
@@ -127,18 +123,3 @@ class Interpolator:
         y, row = math.modf(r * 6.99)
         x, col = math.modf(c * 6.99)
         return self.bicubic(int(row * _WIDTH + col), y, x)
-
-#import pyb
-#def test():
-    #a = array('f', (x for x in range(4)))
-    #coeffs = array('f', (0.0, 0.5, 2.0, 3.0, 4.0, 5.0))
-    #res = array('f', (0.0,))
-    #for _ in range(10):
-        #for i in range(4):
-            #a[i] = pyb.rng()/2**29
-        #x = pyb.rng()/2**30
-        #print('Py', interp_arr_x(a, x))
-        #coeffs[0] = x
-        #res[0] = 0
-        #interp_arr(a, coeffs, res)
-        #print('Asm', res[0])
