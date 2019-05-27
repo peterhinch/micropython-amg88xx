@@ -21,7 +21,7 @@ class.
 Constructor:  
 This takes a single arg, an `AMG88XX` instance.
 
-Methods:__
+Methods:  
  * `refresh` No args. Causes the `AMG88XX` instance and the interpolator to
  update with physical data.
  * `__call__` args `r, c`. The interpolator's coordinate space covers the range
