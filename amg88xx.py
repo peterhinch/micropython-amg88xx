@@ -155,7 +155,7 @@ class AMG88XX:
 
     # Call before accessing a frame of data. Can be called in an ISR.
     # Blocks for 2.9ms on Pyboard 1.0
-    def refresh(self, _ = None):  # Dummy arg for use in timer callback
+    def refresh(self, _=None):  # Dummy arg for use in timer callback
         i2c = self._i2c
         memaddr = _PIXEL_OFFSET
         i2c.readfrom_mem_into(self._address, memaddr, self._buf)
