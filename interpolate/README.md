@@ -1,15 +1,15 @@
 # AMG8833 Interpolating Camera
 
-The 8*8 resolution of the AMG8833 produces a "blocky" display. The illusion of
+The 8x8 resolution of the AMG8833 produces a "blocky" display. The illusion of
 higher resolution may be achieved using bicubic interpolation. This is
-computationally intensive. On a Pyboard 1.1 the frame rate for 32*32 pixels
+computationally intensive. On a Pyboard 1.1 the frame rate for 32x32 pixels
 using Python code is ~1Hz. This can be increased to ~2.5Hz using assembler.
 
 ##### [Main README](../README.md)
 
 # 1. Files
 
- * `cam_interp.py` 32*32 pixel demo using the Adafruit 0.96 inch OLED.
+ * `cam_interp.py` 32x32 pixel demo using the Adafruit 0.96 inch OLED.
  * `interpolate.py` Portable interpolator using optimised Python code.
  * `interpolate_a.py` Version using Arm Thumb2 Assembler.
 
@@ -30,9 +30,9 @@ Methods:__
 
 # Usage
 
-Converting a working 8*8 camera application to use interpolation is simple. The
-aim is to replace the 8*8 array of pixels with a larger array of smaller
-pixels: the `cam_interp.py` demo uses 32*32 squares of size 2*2.
+Converting a working 8x8 camera application to use interpolation is simple. The
+aim is to replace the 8x8 array of pixels with a larger array of smaller
+pixels: the `cam_interp.py` demo uses 32x32 squares of size 2x2.
 
 After instantiating the sensor, create an `Interpolator`:
 ```python

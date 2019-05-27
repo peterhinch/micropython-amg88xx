@@ -34,7 +34,7 @@ The driver for the official LCD160CR is included in Pyboard firmware. Source is
 
 ## 1.1 Interpolation
 
-In camera applications the 8*8 matrix of the AMG8833 gives a "blocky" effect.
+In camera applications the 8x8 matrix of the AMG8833 gives a "blocky" effect.
 This can be reduced by using bicubic interpolation. Files and
 [doc](./interpolate/README.md) for this are in the `interpolate` directory.
 
@@ -69,7 +69,7 @@ Data access methods:
  callback (see commented out code in `cam.py`).
  * `__getitem__` Args `row`, `col`. Enables access to the data retrieved by
  `refresh`. Return value is a signed integer representing the temperature of
- that pixel in °C (or °C * 4 in high resolution mode).
+ that pixel in °C (or °C x 4 in high resolution mode).
  * `temperature` No args. Returns the device temperature in °C as a float.
 
 Mode setting methods:
