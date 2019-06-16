@@ -12,6 +12,12 @@ Adapted by Peter Hinch. Dependencies on Adafruit libraries removed, coding
 adapted to conform to MicroPython conventions. Extended to provide additional
 functionality.
 
+A typical camera build:
+![Image](images/build.jpg)  
+An interpolated image (our cat curled up asleep):
+![Image](images/cat.jpg)  
+The update rate with bicubic interpolation is just over 2Hz.
+
 # 1. Files
 
  * `amg88xx.py` The device driver.
