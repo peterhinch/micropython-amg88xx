@@ -12,11 +12,11 @@ Adapted by Peter Hinch. Dependencies on Adafruit libraries removed, coding
 adapted to conform to MicroPython conventions. Extended to provide additional
 functionality.
 
-A typical camera build:
+A typical camera build:  
 ![Image](images/build.jpg)  
-Interpolated images (a cup of coffee):
+Interpolated images (a cup of coffee):  
 ![Image](images/coffee.jpg)  
-My chair after I had got up:
+My chair a while after I had got up:  
 ![Image](images/chair.jpg)  
 
 The update rate with bicubic interpolation is just over 3Hz.
