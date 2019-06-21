@@ -14,9 +14,12 @@ functionality.
 
 A typical camera build:
 ![Image](images/build.jpg)  
-An interpolated image (our cat curled up asleep):
-![Image](images/cat.jpg)  
-The update rate with bicubic interpolation is just over 2Hz.
+Interpolated images (a cup of coffee):
+![Image](images/coffee.jpg)  
+My chair after I had got up:
+![Image](images/chair.jpg)  
+
+The update rate with bicubic interpolation is just over 3Hz.
 
 # 1. Files
 
