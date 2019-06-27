@@ -36,10 +36,15 @@ For thermal camera use:
 
 The Adafruit OLED display driver is from
 [this repo](https://github.com/peterhinch/micropython-nano-gui.git)
-which also has a driver for their larger displays based on the SSD1351 chip.
+which also has drivers for their larger displays based on the SSD1351 chip.
+The repo has optional drivers supporting 16 bit color: these trade improved
+color against a larger frame buffer, and so are best suited to platforms
+with plenty of RAM.
 
 The driver for the official LCD160CR is included in Pyboard firmware. Source is
 [here](https://github.com/micropython/micropython/blob/master/drivers/display/lcd160cr.py).
+
+The `my_cam` directory contains a complete set of files for my camera project.
 
 ## 1.1 Interpolation
 

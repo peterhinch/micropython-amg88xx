@@ -11,7 +11,7 @@ import micropython
 import gc
 
 from aswitch import Switch, Delay_ms
-from ssd1351 import SSD1351 as SSD  # STM Asm version
+from ssd1351_16bit import SSD1351 as SSD  # STM Asm version
 from writer import CWriter
 import courier17 as font  # Main text
 import arial10  # Small text

@@ -7,7 +7,10 @@
 import framebuf
 import machine
 import utime
-from ssd1331 import SSD1331  # Driver for 0.96 inch OLED
+# 8-bit color driver for 0.96 inch OLED
+from ssd1331 import SSD1331
+# Optional 16-bit color driver
+# from ssd1331_16bit import SSD1331
 from mapper import Mapper  # Maps temperature to rgb color
 from amg88xx import AMG88XX
 
