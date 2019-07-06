@@ -18,6 +18,10 @@ Interpolated images (a cup of coffee):
 ![Image](images/coffee.jpg)  
 My chair a while after I had got up:  
 ![Image](images/chair.jpg)  
+A re-creation of the Adafruit [fingers](https://www.adafruit.com/product/3538)
+demo. Note that their version uses numpy and scipy on a Raspberry Pi as against
+bicubic interpolation on a Pyboard.
+![Image](images/fingers.jpg)
 
 The update rate with bicubic interpolation is just over 3Hz.
 
