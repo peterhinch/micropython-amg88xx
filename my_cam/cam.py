@@ -7,10 +7,11 @@
 from machine import Pin, SPI, I2C, freq
 from utime import ticks_ms, ticks_diff
 import uasyncio as asyncio
-import micropython
+from micropython import const, mem_info
 import gc
 
-from aswitch import Switch, Delay_ms
+from primitives.switch import Switch
+from primitives.delay_ms import Delay_ms
 from ssd1351_16bit import SSD1351 as SSD  # STM Asm version
 from writer import CWriter
 import courier17 as font  # Main text
@@ -20,17 +21,23 @@ from amg88xx import AMG88XX
 from interpolate_a import Interpolator  # STM assembler version
 
 freq(216_000_000)  # In old version improved update rate 750ms -> 488ms
-loop = asyncio.get_event_loop()
 
 eliza = lambda *_ : None
+
+# Possible modes. Note there is no point in having a _HOLD mode as the text
+# fields are not updated so it would never show.
+_NORM = const(0)
+_AUTO = const(1)
+_HOG = const(2)
 
 class Cam:
 
     def __init__(self, txt_rf_ms, verbose):
+        self.txt_rf_ms = txt_rf_ms
         self.verbose = verbose
         self.tmax = 30  # Initial temperature range
         self.tmin = 15
-        self.auto_range = False
+        self.mode = _NORM
         # Enable initial update
         self.rf_disp = True
         self.rf_txt = True
@@ -40,13 +47,13 @@ class Cam:
 
         # Instantiate switches
         self.timer = Delay_ms(duration=2000)  # Long press delay
-        # Release arg rarg is for future use. Enables calling switch to be identified.
+        # Release arg rarg enables calling switch to be identified.
         for item in (('X4', self.chmax, 5, self.ar, 0), ('Y1', self.chmax, -5, self.ar, 1),
                      ('X5', self.chmin, 5, eliza, 2), ('X6', self.chmin, -5, eliza, 3)):
-            sw, func, arg, rfunc, rarg = item
+            sw, func, arg, long_func, rarg = item
             cs = Switch(Pin(sw, Pin.IN, Pin.PULL_UP))
             cs.close_func(self.press, (func, arg))
-            cs.open_func(self.release, (rfunc, rarg))
+            cs.open_func(self.release, (long_func, rarg))
 
         # Instantiate display
         pdc = Pin('X1', Pin.OUT_PP, value=0)
@@ -60,20 +67,20 @@ class Cam:
         ssd.fill(0)
         ssd.show()
 
+        self.avg = 0.0
         # Instantiate PIR temperature sensor
         i2c = I2C(2)
         pir = AMG88XX(i2c)
         pir.ma_mode(True)  # Moving average mode
 
         # Run the camera
-        loop.create_task(self.run(pir, ssd))
-        loop.create_task(self.refresh_txt(txt_rf_ms))
+        asyncio.create_task(self.run(pir, ssd))
 
     # A switch was pressed. Change temperature range.
     def press(self, func, arg):
         self.timer.trigger()
-        if self.auto_range:  # Short press clears auto range
-            self.auto_range = False  # Leave range unchanged
+        self.mode = _NORM
+        if self.mode == _AUTO:  # Short press clears auto range, leaves range unchanged
             self.rf_disp = True
             self.rf_txt = True
         else:
@@ -92,13 +99,18 @@ class Cam:
 
     def release(self, func, arg):
         if self.timer.running():  # Brief press: re-enable display
-            self.rf_disp = True
             self.rf_txt = True  # Show changed range
+            self.rf_disp = True
         else:
-            func(arg)
+            func(arg)  # eliza will leave it with rf_disp False
 
-    def ar(self, _):
-        self.auto_range = True
+    def ar(self, sw):  # Long press callback, top switch
+        if sw:  # Animal detection mode
+            self.mode = _HOG
+            self.tmin = self.avg
+            self.tmax = self.avg + 5
+        else:  # Auto range
+            self.mode = _AUTO
         self.rf_disp = True
         self.rf_txt = True  # Show changed range
 
@@ -112,9 +124,9 @@ class Cam:
             val -= dt
 
     # Refreshing text is slow so do it periodically to maximise mean image framerate
-    async def refresh_txt(self, tim):
+    async def refresh_txt(self):
         while True:
-            await asyncio.sleep_ms(tim)
+            await asyncio.sleep_ms(self.txt_rf_ms)
             self.rf_txt = True
 
     # Run the camera
@@ -151,7 +163,8 @@ class Cam:
                     sum_t += val
                     ssd.rect(col * 2, row * 2, 2, 2, ssd.rgb(*self.mapper(val)))
                 await asyncio.sleep(0)
-            if self.auto_range:
+            self.avg = round(sum_t / 1024)
+            if self.mode == _AUTO:
                 self.tmin = round(min_t)
                 self.tmax = round(max_t)
             if self.rf_disp:
@@ -159,7 +172,7 @@ class Cam:
                     wri_l.set_textpos(ssd, 66, 0)
                     wri_l.printstring('Max:{:+4d}C\n'.format(int(max_t)))
                     wri_l.printstring('Min:{:+4d}C\n'.format(int(min_t)))
-                    wri_l.printstring('Avg:{:+4d}C'.format(round(sum_t / 1024)))
+                    wri_l.printstring('Avg:{:+4d}C'.format(self.avg))
                     wri_s.set_textpos(ssd, 128 - arial10.height(), 64)
                     wri_s.setcolor(yellow, black)
                     wri_s.printstring('Chip:{:5.1f}C'.format(pir.temperature()))
@@ -168,7 +181,12 @@ class Cam:
                     wri_s.printstring('{:4d}C '.format(self.tmax))
                     wri_s.set_textpos(ssd, 28, 95)
                     wri_s.setcolor(green, black)
-                    wri_s.printstring('AR:{:s}'.format('on ' if self.auto_range else 'off'))
+                    if self.mode == _HOG:
+                        wri_s.printstring('Hog  ')
+                    elif self.mode == _NORM:
+                        wri_s.printstring('Norm  ')
+                    else:
+                        wri_s.printstring('Auto  ')
                     wri_s.set_textpos(ssd, 64 - arial10.height(), 90)
                     wri_s.setcolor(blue, black)
                     wri_s.printstring('{:4d}C '.format(self.tmin))
@@ -176,11 +194,11 @@ class Cam:
                 ssd.show()
             self.verbose and print(ticks_diff(ticks_ms(), t))
             gc.collect()
-#            self.verbose and micropython.mem_info()
+#            self.verbose and mem_info()
 
 # stack: 1276 out of 15360
 # GC: total: 196672, used: 52128, free: 144544
 # No. of 1-blocks: 365, 2-blocks: 106, max blk sz: 1024, max free sz: 2545
 
 cam = Cam(2000, False)  # Refresh text every 2000ms. Verbose?
-loop.run_forever()
+asyncio.run(cam.refresh_txt())
